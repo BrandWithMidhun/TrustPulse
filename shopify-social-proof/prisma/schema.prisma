@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id            String    @id
+  shop          String
+  state         String
+  isOnline      Boolean   @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean   @default(false)
+  locale        String?
+  collaborator  Boolean?  @default(false)
+  emailVerified Boolean?  @default(false)
+}
+
+model PopupSettings {
+  id                String   @id @default(cuid())
+  shop              String   @unique
+  enabled           Boolean  @default(true)
+  displayType       String   @default("recent_sales") // recent_sales | live_visitors | reviews | add_to_cart
+  position          String   @default("bottom-left") // bottom-left | bottom-right | top-left | top-right
+  theme             String   @default("dark") // dark | light | custom
+  customBgColor     String?
+  customTextColor   String?
+  customAccentColor String?
+  showDelay         Int      @default(3) // seconds before first popup
+  displayDuration   Int      @default(6) // seconds popup stays visible
+  betweenDelay      Int      @default(8) // seconds between popups
+  mobileEnabled     Boolean  @default(true)
+  showProductImage  Boolean  @default(true)
+  showTimeAgo       Boolean  @default(true)
+  showLocation      Boolean  @default(true)
+  anonymousName     Boolean  @default(false)
+  maxPopups         Int      @default(0) // 0 = unlimited per session
+  excludedPages     String   @default("[]") // JSON array of page paths
+  includedPages     String   @default("[]") // JSON array of page paths (empty = all)
+  customHeadline    String?
+  customMessage     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model PopupActivity {
+  id         String   @id @default(cuid())
+  shop       String
+  type       String   // impression | click | close
+  popupType  String   // recent_sales | live_visitors | reviews
+  productId  String?
+  orderId    String?
+  sessionId  String?
+  createdAt  DateTime @default(now())
+
+  @@index([shop, createdAt])
+}
+
+model RecentOrder {
+  id          String   @id @default(cuid())
+  shop        String
+  orderId     String
+  productId   String?
+  productTitle String
+  productImage String?
+  productHandle String?
+  customerName String
+  customerCity String?
+  customerCountry String?
+  orderCreatedAt DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([shop, orderCreatedAt])
+  @@unique([shop, orderId])
+}

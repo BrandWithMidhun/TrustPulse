@@ -1,0 +1,13 @@
+api_version = "2024-01"
+
+[[extensions]]
+type = "theme_app_extension"
+name = "Social Proof Popup Widget"
+handle = "social-proof-popup"
+
+  [extensions.settings]
+  [[extensions.settings.fields]]
+  key = "popup_enabled"
+  type = "boolean"
+  name = "Enable Popups"
+  default = true

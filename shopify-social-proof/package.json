@@ -1,0 +1,44 @@
+{
+  "name": "social-proof-popups",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "remix build",
+    "dev": "shopify app dev",
+    "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
+    "setup": "prisma generate && prisma migrate deploy",
+    "start": "remix-serve build/index.js",
+    "docker-start": "npm run setup && npm run start",
+    "prisma": "prisma"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.9.1",
+    "@remix-run/node": "^2.6.0",
+    "@remix-run/react": "^2.6.0",
+    "@remix-run/serve": "^2.6.0",
+    "@shopify/app-bridge-react": "^3.7.10",
+    "@shopify/polaris": "^12.0.0",
+    "@shopify/shopify-app-remix": "^2.6.1",
+    "@shopify/shopify-app-session-storage-prisma": "^5.0.2",
+    "isbot": "^4.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@remix-run/dev": "^2.6.0",
+    "@types/node": "^20.11.5",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "eslint": "^8.56.0",
+    "eslint-config-remix": "^2.0.1",
+    "prisma": "^5.9.1",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.12"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "workspaces": [
+    "extensions/*"
+  ]
+}
