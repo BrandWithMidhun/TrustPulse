@@ -1,9 +1,9 @@
 import { json } from "@remix-run/node";
-import { unauthenticated } from "../shopify.server";
-import prisma from "../db.server";
 
 // This endpoint is called by the storefront script to get popup data
 export const loader = async ({ request }) => {
+  const { default: prisma } = await import("../db.server");
+
   const url = new URL(request.url);
   const shop = url.searchParams.get("shop");
 
@@ -11,7 +11,6 @@ export const loader = async ({ request }) => {
     return json({ error: "Missing shop parameter" }, { status: 400 });
   }
 
-  // CORS headers for storefront access
   const headers = {
     "Access-Control-Allow-Origin": `https://${shop}`,
     "Access-Control-Allow-Methods": "GET, OPTIONS",
@@ -24,14 +23,12 @@ export const loader = async ({ request }) => {
   }
 
   try {
-    // Get popup settings
     const settings = await prisma.popupSettings.findUnique({ where: { shop } });
 
     if (!settings || !settings.enabled) {
       return json({ enabled: false }, { headers });
     }
 
-    // Get recent orders for social proof
     const recentOrders = await prisma.recentOrder.findMany({
       where: { shop },
       orderBy: { orderCreatedAt: "desc" },
@@ -47,14 +44,12 @@ export const loader = async ({ request }) => {
       },
     });
 
-    // Anonymize names if setting is on
     const processedOrders = recentOrders.map(o => ({
       ...o,
       customerName: settings.anonymousName ? anonymizeName(o.customerName) : o.customerName,
       orderCreatedAt: o.orderCreatedAt.toISOString(),
     }));
 
-    // Get live visitor count (simulated - in production use Redis/analytics)
     const liveVisitors = Math.floor(Math.random() * 15) + 3;
 
     return json({
@@ -88,6 +83,8 @@ export const loader = async ({ request }) => {
 
 // POST to track events
 export const action = async ({ request }) => {
+  const { default: prisma } = await import("../db.server");
+
   const url = new URL(request.url);
   const shop = url.searchParams.get("shop");
 
