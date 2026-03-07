@@ -15,20 +15,19 @@ import {
   DataTable,
   EmptyState,
 } from "@shopify/polaris";
-import { authenticate } from "../shopify.server";
-import prisma from "../db.server";
 
 export const loader = async ({ request }) => {
+  const { authenticate } = await import("../shopify.server");
+  const { default: prisma } = await import("../db.server");
+
   const { session } = await authenticate.admin(request);
   const shop = session.shop;
 
-  // Get or create settings
   let settings = await prisma.popupSettings.findUnique({ where: { shop } });
   if (!settings) {
     settings = await prisma.popupSettings.create({ data: { shop } });
   }
 
-  // Get analytics: last 30 days
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -168,10 +167,7 @@ export default function Index() {
                   <Text variant="headingMd" as="h2">Recent Sales Activity</Text>
                   <Divider />
                   {recentOrders.length === 0 ? (
-                    <EmptyState
-                      heading="No orders yet"
-                      image=""
-                    >
+                    <EmptyState heading="No orders yet" image="">
                       <p>Orders will appear here once customers start purchasing.</p>
                     </EmptyState>
                   ) : (
