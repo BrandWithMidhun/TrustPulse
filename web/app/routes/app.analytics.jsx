@@ -9,18 +9,17 @@ import {
   InlineStack,
   DataTable,
   Badge,
-  Box,
   Divider,
   EmptyState,
 } from "@shopify/polaris";
-import { authenticate } from "../shopify.server";
-import prisma from "../db.server";
 
 export const loader = async ({ request }) => {
+  const { authenticate } = await import("../shopify.server");
+  const { default: prisma } = await import("../db.server");
+
   const { session } = await authenticate.admin(request);
   const shop = session.shop;
 
-  const now = new Date();
   const days = [7, 30].map(d => {
     const date = new Date();
     date.setDate(date.getDate() - d);
@@ -29,7 +28,7 @@ export const loader = async ({ request }) => {
 
   const [
     impressions7d, clicks7d, impressions30d, clicks30d,
-    topProducts, hourlyData, recentActivity,
+    topProducts, recentActivity,
   ] = await Promise.all([
     prisma.popupActivity.count({ where: { shop, type: "impression", createdAt: { gte: days[0] } } }),
     prisma.popupActivity.count({ where: { shop, type: "click", createdAt: { gte: days[0] } } }),
@@ -42,8 +41,6 @@ export const loader = async ({ request }) => {
       orderBy: { _count: { id: "desc" } },
       take: 5,
     }),
-    // Fake hourly data for display - in production this would be real
-    Promise.resolve([]),
     prisma.popupActivity.findMany({
       where: { shop },
       orderBy: { createdAt: "desc" },
