@@ -3,13 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "remix build",
+    "build": "remix vite:build",
     "dev": "shopify app dev",
-    "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
     "setup": "prisma generate && prisma migrate deploy",
-    "start": "remix-serve build/index.js",
-    "docker-start": "npm run setup && npm run start",
-    "prisma": "prisma"
+    "start": "remix-serve ./build/server/index.js",
+    "docker-start": "npm run setup && npm run start"
   },
   "dependencies": {
     "@prisma/client": "^5.9.1",
@@ -30,15 +28,11 @@
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "eslint": "^8.56.0",
-    "eslint-config-remix": "^2.0.1",
     "prisma": "^5.9.1",
     "typescript": "^5.3.3",
     "vite": "^5.0.12"
   },
   "engines": {
     "node": ">=18.0.0"
-  },
-  "workspaces": [
-    "extensions/*"
-  ]
+  }
 }
