@@ -1,6 +1,6 @@
-import { json, redirect } from "@remix-run/node";
+import { json } from "@remix-run/node";
 import { useLoaderData, useSubmit, useNavigation, useActionData } from "@remix-run/react";
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import {
   Page,
   Layout,
@@ -16,17 +16,15 @@ import {
   Badge,
   Divider,
   Banner,
-  Toast,
   Frame,
-  ColorPicker,
-  Popover,
   Box,
   Tabs,
 } from "@shopify/polaris";
-import { authenticate } from "../shopify.server";
-import prisma from "../db.server";
 
 export const loader = async ({ request }) => {
+  const { authenticate } = await import("../shopify.server");
+  const { default: prisma } = await import("../db.server");
+
   const { session } = await authenticate.admin(request);
   const shop = session.shop;
   let settings = await prisma.popupSettings.findUnique({ where: { shop } });
@@ -37,6 +35,9 @@ export const loader = async ({ request }) => {
 };
 
 export const action = async ({ request }) => {
+  const { authenticate } = await import("../shopify.server");
+  const { default: prisma } = await import("../db.server");
+
   const { session } = await authenticate.admin(request);
   const shop = session.shop;
   const formData = await request.formData();
@@ -194,7 +195,7 @@ export default function Settings() {
                           onChange={v => setFormState(s => ({ ...s, showLocation: v }))}
                         />
                         <Checkbox
-                          label="Anonymize customer names (show as J***)"
+                          label="Anonymize customer names (show as J.)"
                           checked={formState.anonymousName}
                           onChange={v => setFormState(s => ({ ...s, anonymousName: v }))}
                         />
@@ -204,26 +205,28 @@ export default function Settings() {
                           onChange={v => setFormState(s => ({ ...s, mobileEnabled: v }))}
                         />
                       </BlockStack>
-                      <TextField
-                        label="Maximum popups per session (0 = unlimited)"
-                        type="number"
-                        value={String(formState.maxPopups)}
-                        onChange={v => setFormState(s => ({ ...s, maxPopups: parseInt(v) || 0 }))}
-                        min="0"
-                        helpText="Limit how many times a visitor sees popups in one session"
-                      />
+                      <BlockStack gap="200">
+                        <Text>Max popups per session (0 = unlimited): {formState.maxPopups}</Text>
+                        <RangeSlider
+                          label=""
+                          min={0} max={20} step={1}
+                          value={formState.maxPopups}
+                          onChange={v => setFormState(s => ({ ...s, maxPopups: v }))}
+                          output
+                        />
+                      </BlockStack>
                     </BlockStack>
                   )}
 
                   {selectedTab === 1 && (
                     <BlockStack gap="400">
-                      <Text variant="headingMd">Visual Design</Text>
+                      <Text variant="headingMd">Design</Text>
                       <Select
                         label="Theme"
                         options={[
-                          { label: "Dark (recommended)", value: "dark" },
+                          { label: "Dark", value: "dark" },
                           { label: "Light", value: "light" },
-                          { label: "Custom Colors", value: "custom" },
+                          { label: "Custom", value: "custom" },
                         ]}
                         value={formState.theme}
                         onChange={v => setFormState(s => ({ ...s, theme: v }))}
