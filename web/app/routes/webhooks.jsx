@@ -1,8 +1,8 @@
-import { authenticate } from "../shopify.server";
-import prisma from "../db.server";
-
 export const action = async ({ request }) => {
-  const { topic, shop, session, admin, payload } =
+  const { authenticate } = await import("../shopify.server");
+  const { default: prisma } = await import("../db.server");
+
+  const { topic, shop, session, payload } =
     await authenticate.webhook(request);
 
   switch (topic) {
@@ -13,7 +13,7 @@ export const action = async ({ request }) => {
       break;
 
     case "ORDERS_CREATE":
-      await handleOrderCreate(shop, payload);
+      await handleOrderCreate(shop, payload, prisma);
       break;
 
     default:
@@ -23,20 +23,12 @@ export const action = async ({ request }) => {
   throw new Response("", { status: 200 });
 };
 
-async function handleOrderCreate(shop, order) {
+async function handleOrderCreate(shop, order, prisma) {
   try {
     if (!order || !order.line_items?.length) return;
 
-    // Store each line item as a recent order for social proof
-    for (const item of order.line_items.slice(0, 1)) { // Just first item
-      const customerName = getCustomerName(order, shop);
-      
-      // Check if product has an image
-      let productImage = null;
-      if (item.product_id) {
-        // We'll store without image for now - can fetch via Admin API if needed
-        productImage = null;
-      }
+    for (const item of order.line_items.slice(0, 1)) {
+      const customerName = getCustomerName(order);
 
       await prisma.recentOrder.upsert({
         where: { shop_orderId: { shop, orderId: String(order.id) } },
@@ -46,7 +38,7 @@ async function handleOrderCreate(shop, order) {
           orderId: String(order.id),
           productId: item.product_id ? String(item.product_id) : null,
           productTitle: item.title || "Product",
-          productImage,
+          productImage: null,
           productHandle: null,
           customerName,
           customerCity: order.billing_address?.city || order.shipping_address?.city || null,
@@ -57,15 +49,15 @@ async function handleOrderCreate(shop, order) {
     }
 
     // Keep only last 100 orders per shop
-    const orders = await prisma.recentOrder.findMany({
+    const oldOrders = await prisma.recentOrder.findMany({
       where: { shop },
       orderBy: { orderCreatedAt: "desc" },
       skip: 100,
       select: { id: true },
     });
-    if (orders.length) {
+    if (oldOrders.length) {
       await prisma.recentOrder.deleteMany({
-        where: { id: { in: orders.map(o => o.id) } },
+        where: { id: { in: oldOrders.map(o => o.id) } },
       });
     }
   } catch (e) {
@@ -73,7 +65,7 @@ async function handleOrderCreate(shop, order) {
   }
 }
 
-function getCustomerName(order, shop) {
+function getCustomerName(order) {
   const first = order.customer?.first_name;
   const last = order.customer?.last_name;
   if (first && last) return `${first} ${last.charAt(0)}.`;
