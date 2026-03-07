@@ -1,7 +1,8 @@
 import { json } from "@remix-run/node";
-import { authenticate } from "../shopify.server";
 
 export const action = async ({ request }) => {
+  const { authenticate } = await import("../shopify.server");
+
   const { admin, session } = await authenticate.admin(request);
   const shop = session.shop;
   const formData = await request.formData();
