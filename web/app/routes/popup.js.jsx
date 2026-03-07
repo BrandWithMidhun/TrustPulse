@@ -87,9 +87,9 @@ export const loader = async ({ request }) => {
       var css='.sp-wrap{position:fixed;'+pc+';z-index:999999;display:none;align-items:center;gap:12px;background:'+bg+';color:'+tx+';border-radius:14px;padding:14px;max-width:320px;min-width:260px;box-shadow:0 8px 32px rgba(0,0,0,0.3);cursor:pointer;font-family:sans-serif;transform:'+sd+';opacity:0;transition:transform 0.4s ease,opacity 0.3s ease;overflow:hidden;border:1px solid rgba(255,255,255,0.1)}.sp-wrap.sp-on{transform:translateX(0);opacity:1}.sp-prog{position:absolute;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,0.1)}.sp-bar{height:100%;background:'+ac+';width:100%}.sp-close{position:absolute;top:6px;right:8px;background:none;border:none;color:'+tx+';opacity:0.5;font-size:14px;cursor:pointer;padding:2px 5px}.sp-iw{flex-shrink:0;width:48px;height:48px;border-radius:10px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden}.sp-cnt{flex:1;min-width:0;padding-right:14px}.sp-hl{font-size:11px;opacity:0.6;margin-bottom:2px}.sp-title{font-size:13px;font-weight:600;line-height:1.3}.sp-sub{font-size:11px;color:'+ac+';margin-top:2px}';
       var s=document.createElement('style');s.textContent=css;document.head.appendChild(s);
     }
-    function ago(date,c){
+    function ago(date){
       var m=Math.floor((new Date()-date)/60000),h=Math.floor(m/60),d=Math.floor(h/24);
-      if(m<1)return'Just '+(c?'added':'purchased');
+      if(m<1)return'Just purchased';
       if(m<60)return m+'m ago';
       if(h<24)return h+'h ago';
       return d+'d ago';
