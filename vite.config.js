@@ -6,16 +6,17 @@ export default defineConfig({
     remix({
       ignoredRouteFiles: ["**/.*"],
       appDirectory: "web/app",
+      serverModuleFormat: "cjs",
     }),
   ],
+  ssr: {
+    noExternal: ["@shopify/shopify-app-remix"],
+  },
   build: {
     assetsInlineLimit: 0,
   },
   server: {
     port: Number(process.env.PORT || 3000),
     host: "0.0.0.0",
-  },
-  optimizeDeps: {
-    include: ["@shopify/polaris"],
   },
 });
